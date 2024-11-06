@@ -7,15 +7,38 @@
 
 import SwiftUI
 
-struct ContentView: View {
-    var body: some View {
-        Text("Hello, world!")
-            .padding()
+struct CurrentDate: Decodable, Identifiable {
+    let id = UUID()
+    let date: String
+    
+    private enum CodingKeys: String, CodingKey {
+        case date = "date"
     }
 }
 
-struct ContentView_Previews: PreviewProvider {
-    static var previews: some View {
-        ContentView()
+struct ContentView: View {
+
+    var body: some View {
+        NavigationStack {
+            List(1...10, id: \.self) { index in
+                Text("\(index)")
+            }.listStyle(.plain)
+            
+            .navigationTitle("Dates")
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        
+                    } label: {
+                        Image(systemName: "arrow.clockwise.circle")
+                    }
+
+                }
+            }
+        }
     }
+}
+
+#Preview {
+    ContentView()
 }
