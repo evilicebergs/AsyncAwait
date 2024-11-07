@@ -7,41 +7,13 @@
 
 import SwiftUI
 
-struct CurrentDate: Decodable, Identifiable {
-    let id = UUID()
-    let date: String
-    
-    private enum CodingKeys: String, CodingKey {
-        case date = "date"
-    }
-}
-
 struct ContentView: View {
     
-    @State private var currentDates: [CurrentDate] = []
-
-    private func getDate() async throws -> CurrentDate? {
-        guard let url = URL(string: "https://ember-sparkly-rule.glitch.me/current-date") else {
-            fatalError("URL is incorrect")
-        }
-        
-        let (data, _) = try await URLSession.shared.data(from: url)
-        return try? JSONDecoder().decode(CurrentDate.self, from: data)
-    }
-    
-    private func populateDates() async {
-        do {
-            guard let currentDate = try await getDate() else { return }
-            
-            currentDates.append(currentDate)
-        } catch {
-            print(error)
-        }
-    }
+    @StateObject private var vm = ViewModel()
     
     var body: some View {
         NavigationStack {
-            List(currentDates) { currentDate in
+            List(vm.currentDates, id: \.id) { currentDate in
                 Text("\(currentDate.date)")
             }.listStyle(.plain)
             
@@ -50,7 +22,7 @@ struct ContentView: View {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
                         Task {
-                            await populateDates()
+                            await vm.getAllDates()
                         }
                     } label: {
                         Image(systemName: "arrow.clockwise.circle")
@@ -59,7 +31,7 @@ struct ContentView: View {
                 }
             }
             .task {
-                await populateDates()
+                await vm.getAllDates()
             }
         }
     }
